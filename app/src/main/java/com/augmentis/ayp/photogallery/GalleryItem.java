@@ -7,13 +7,13 @@ import java.util.Objects;
  * Created by Apinya on 8/16/2016.
  */
 public class GalleryItem {
-    private String mId;
-    private String title;
-    private String url;
 
+    private String mId;
+    private String mTitle;
+    private String mUrl;
 
     public void setId(String id) {
-        this.mId = id;
+        mId = id;
     }
 
     public String getId() {
@@ -21,34 +21,37 @@ public class GalleryItem {
     }
 
     public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
+        mTitle = title;
     }
 
     public String getTitle() {
-        return title;
+        return mTitle;
+    }
+
+    public void setUrl(String url) {
+        mUrl = url;
     }
 
     public String getUrl() {
-        return url;
+        return mUrl;
     }
 
-    public String getName(){
+    public String getName() {
         return getTitle();
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    public void setName(String name) {
+        setTitle(name);
+    }
 
-        if(obj instanceof GalleryItem){
-            //is GalleryItem too!!
-            GalleryItem that = (GalleryItem) obj;
+    @Override
+    public boolean equals(Object o) {
+
+        if (o instanceof GalleryItem) {
+            //is GalleryItem too!
+            GalleryItem that = (GalleryItem) o;
 
             return that.mId != null && mId != null && that.mId.equals(mId);
-
         }
         return false;
     }
