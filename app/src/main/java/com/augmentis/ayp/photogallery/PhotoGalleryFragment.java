@@ -1,11 +1,13 @@
 package com.augmentis.ayp.photogallery;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import java.util.List;
  * Created by Apinya on 8/16/2016.
  */
 public class PhotoGalleryFragment extends Fragment {
+    private static final String TAG = "PhotoGalleryFragment";
 
     public static PhotoGalleryFragment newInstance(){
 
@@ -38,6 +41,9 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
+        Log.d(TAG, "Start Intent Service");
+        Intent i = PollService.newIntent(getActivity());
+        getActivity().startService(i);
     }
 
     @Nullable
