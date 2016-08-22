@@ -47,6 +47,13 @@ public class FlickrFetcherAndroidTest {
     }
 
     @Test
+    public void testSearch() throws Exception{
+        String json = mFlickrFetcher.searchItems("bird");
+
+        assertThat(json, containsString("perpage"));
+    }
+
+    @Test
     public void testFetchList() throws Exception{
         List<GalleryItem> galleryItemList = new ArrayList<>();
        mFlickrFetcher.fetchItem(galleryItemList);
