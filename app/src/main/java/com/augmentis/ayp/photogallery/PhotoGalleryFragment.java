@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.util.LruCache;
 import android.support.v7.widget.GridLayoutManager;
@@ -32,6 +33,8 @@ import java.util.List;
  */
 public class PhotoGalleryFragment extends Fragment {
     private static final String TAG = "PhotoGalleryFragment";
+    private static final int REQUEST_SHOW_PHOTO_DETAIL = 275;
+    private static final String DIALOG_SHOW_PHOTO_DETAIL = "PhotoGallery";
 
     public static PhotoGalleryFragment newInstance(){
 
@@ -218,18 +221,38 @@ public class PhotoGalleryFragment extends Fragment {
     }
 
 
-    class PhotoHolder extends RecyclerView.ViewHolder{
+    class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         ImageView mPhoto;
+        String mBigUrl;
 
         public PhotoHolder(View itemView) {
             super(itemView);
 
             mPhoto = (ImageView) itemView.findViewById(R.id.image_photo);
+
         }
 
         public void bindDrawable(@NonNull Drawable drawable){
             mPhoto.setImageDrawable(drawable);
+            mPhoto.setOnClickListener(this);
+        }
+
+        public void setBigUrl(String bigUrl){
+            mBigUrl = bigUrl;
+        }
+
+        @Override
+        public void onClick(View view) {
+
+            Log.d(TAG, "On Click");
+            Snackbar.make(mRecyclerView, "Clicked on Photo", Snackbar.LENGTH_SHORT).show();
+
+            FragmentManager fm = getFragmentManager();
+            PhotoDialog dD = PhotoDialog.newInstance(mBigUrl);
+            dD.setTargetFragment(PhotoGalleryFragment.this, REQUEST_SHOW_PHOTO_DETAIL);
+            dD.show(fm, DIALOG_SHOW_PHOTO_DETAIL);
+
         }
     }
 
@@ -260,6 +283,7 @@ public class PhotoGalleryFragment extends Fragment {
 
             Log.d(TAG, "bind position #" + position + " , url: " + galleryItem.getUrl());
 
+            holder.setBigUrl(galleryItem.getBigSizeUrl());
             holder.bindDrawable(smileyDrawable);
 
             if(mMemoryCache.get(galleryItem.getUrl()) != null){
