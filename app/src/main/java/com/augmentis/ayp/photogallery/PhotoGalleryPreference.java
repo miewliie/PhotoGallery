@@ -11,8 +11,13 @@ public class PhotoGalleryPreference {
 
 
     private static final String TAG = "PhotoGalleryPref";
-    private static final String PREF_SEARCH_KEY = "PhotoGalleryPref";
-    private static final String PREF_LAST_ID = "PREF_LAST_ID";
+    protected static final String PREF_SEARCH_KEY = "PhotoGalleryPref";
+    protected static final String PREF_LAST_ID = "PREF_LAST_ID";
+
+
+    public static SharedPreferences getSP(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context);
+    }
 
     public static String getStoredSearchKey(Context context) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);

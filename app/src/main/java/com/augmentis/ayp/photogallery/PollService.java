@@ -28,7 +28,7 @@ public class PollService extends IntentService {
 
     private static final String TAG = "PollService";
 
-    private static final int POLL_INTERVAL = 1000*60; //60 sec
+    private static final int POLL_INTERVAL = 1000 * 60; //60 sec
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PollService.class);
@@ -107,13 +107,14 @@ public class PollService extends IntentService {
             notiBuilder.setContentTitle(res.getString(R.string.new_picture_title));
             notiBuilder.setContentText(res.getString(R.string.new_picture_content));
             notiBuilder.setContentIntent(pi);
-            notiBuilder.setAutoCancel(true);
+            notiBuilder.setAutoCancel(true); //if it already have it not appear
 
             Notification notification = notiBuilder.build(); // << Build notification from builder
 
             //Get notification manager from contect
             NotificationManagerCompat nm = NotificationManagerCompat.from(this);
-            nm.notify(0, notification);
+            nm.notify(Long.valueOf(newestId).intValue(), notification);
+//            nm.notify(0, notification);
         }
         PhotoGalleryPreference.setStoredLastId(this, newestId);
     }

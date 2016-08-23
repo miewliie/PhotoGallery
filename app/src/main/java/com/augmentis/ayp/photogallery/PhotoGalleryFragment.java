@@ -188,6 +188,14 @@ public class PhotoGalleryFragment extends Fragment {
             case R.id.menu_search: mSearchKey = null;
                 loadPhoto();
                 return true;
+
+            case R.id.menu_manual_check:
+                Intent pollIntent = PollService.newIntent(getActivity());
+                getActivity().startService(pollIntent);
+                return true;
+
+            case R.id.menu_alarm_clock:
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
