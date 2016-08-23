@@ -73,9 +73,10 @@ public class PhotoGalleryFragment extends Fragment {
         setHasOptionsMenu(true);
         setRetainInstance(true);
 
-//        Intent i = PollService.newIntent(getActivity());
-//        getActivity().startService(i);
-
+        Intent i = PollService.newIntent(getActivity());
+        getActivity().startService(i);
+//
+//        PollJobService.start(getActivity());
         PollService.setServiceAlarm(getActivity(), true);
 
         Log.d(TAG, "Memory sixe = " + maxMemory + " K ");
