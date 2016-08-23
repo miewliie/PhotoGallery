@@ -8,8 +8,8 @@ import java.util.Objects;
  */
 public class GalleryItem {
     private String mId;
-    private String title;
-    private String url;
+    private String mTitle;
+    private String mUrl;
     private String bigSizeUrl;
 
 
@@ -22,19 +22,19 @@ public class GalleryItem {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.mTitle = title;
     }
 
     public void setUrl(String url) {
-        this.url = url;
+        this.mUrl = url;
     }
 
     public String getTitle() {
-        return title;
+        return mTitle;
     }
 
     public String getUrl() {
-        return url;
+        return mUrl;
     }
 
     public String getName(){

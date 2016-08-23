@@ -32,20 +32,21 @@ import java.util.List;
  * Created by Apinya on 8/16/2016.
  */
 public class PhotoGalleryFragment extends Fragment {
+
     private static final String TAG = "PhotoGalleryFragment";
     private static final int REQUEST_SHOW_PHOTO_DETAIL = 275;
     private static final String DIALOG_SHOW_PHOTO_DETAIL = "PhotoGallery";
 
-    public static PhotoGalleryFragment newInstance(){
 
+    public static PhotoGalleryFragment newInstance(){
         Bundle args = new Bundle();
-        PhotoGalleryFragment pf = new PhotoGalleryFragment();
-        pf.setArguments(args);
-        return pf;
+        PhotoGalleryFragment fragment = new PhotoGalleryFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     private RecyclerView mRecyclerView;
-    private FlickrFetcher mPicFlickrFetcher;
+    private FlickrFetcher mFlickrFetcher;
     private PhotoGalleryAdapter mAdapter;
     private String mSearchKey;
 
@@ -81,7 +82,7 @@ public class PhotoGalleryFragment extends Fragment {
         };
 
 
-        mPicFlickrFetcher = new FlickrFetcher();
+        mFlickrFetcher = new FlickrFetcher();
         mFetcherTask = new FetcherTask();
         new FetcherTask().execute();
 
@@ -307,7 +308,7 @@ public class PhotoGalleryFragment extends Fragment {
         boolean running = false;
 
         @Override
-        protected List<GalleryItem> doInBackground(String ... params) {
+        protected List<GalleryItem> doInBackground(String ... params) { //param sent to do in bg sent by sync
 
             synchronized (this) {
                 running = true;
@@ -318,13 +319,14 @@ public class PhotoGalleryFragment extends Fragment {
                 List<GalleryItem> itemList = new ArrayList<>();
 
                 if(params.length > 0 ){
-                    mPicFlickrFetcher.searchPhotos(itemList, params[0]);
+                    mFlickrFetcher.searchPhotos(itemList, params[0]);
                 }else {
-                    mPicFlickrFetcher.getRecentPhotos(itemList);
+                    mFlickrFetcher.getRecentPhotos(itemList);
                 }
 
                 Log.d(TAG, "Fetcher task finished");
                 return itemList;
+
             }finally {
                 synchronized (this) {
                     running = false;
