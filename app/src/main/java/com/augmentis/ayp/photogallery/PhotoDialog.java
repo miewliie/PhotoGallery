@@ -56,11 +56,16 @@ public class PhotoDialog extends DialogFragment implements DialogInterface.OnCli
         imageView.setImageBitmap(loadBitmap);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
         builder.setView(v);
         builder.setPositiveButton("Close", this);
-
+        loadBigImage();
         return builder.create();
+
+    }
+
+    @Override
+    public void onClick(DialogInterface dialogInterface, int i) {
+        getActivity().getFragmentManager().popBackStack();
 
     }
 
@@ -97,5 +102,26 @@ public class PhotoDialog extends DialogFragment implements DialogInterface.OnCli
         protected void onPostExecute(Bitmap bitmap) {
             imageView.setImageBitmap(bitmap);
         }
+    }
+
+    private Bitmap bitmapFromUrl(String bigUrl) throws IOException{
+        Bitmap bitmap;
+
+        HttpURLConnection connection = (HttpURLConnection)new URL(BigUrl).openConnection();
+        connection.setRequestProperty("User-agent", "Mozilla/4.0");
+        connection.connect();
+        InputStream inputStream = connection.getInputStream();
+        bitmap = BitmapFactory.decodeStream(inputStream);
+        return bitmap;
+    }
+
+    private void loadBigImage(){
+        if(mLoadImageTask == null || !mLoadImageTask.isRunning()){
+            mLoadImageTask = new loadImageTask();
+        }
+
+        mLoadImageTask.execute();
+
+
     }
 }
