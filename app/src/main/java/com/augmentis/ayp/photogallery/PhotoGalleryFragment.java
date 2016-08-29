@@ -16,6 +16,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ import java.util.List;
 /**
  * Created by Apinya on 8/16/2016.
  */
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
 
     private static final String TAG = "PhotoGalleryFragment";
 
@@ -129,6 +131,7 @@ public class PhotoGalleryFragment extends Fragment {
 
         MenuItem menuItem = menu.findItem(R.id.menu_search);
         final SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQuery(mSearchKey, false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -213,10 +216,6 @@ public class PhotoGalleryFragment extends Fragment {
         }
     }
 
-    /**
-     *
-     *
-     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -225,10 +224,6 @@ public class PhotoGalleryFragment extends Fragment {
         Log.i(TAG, "Stop background thread");
     }
 
-    /**
-     *
-     *
-     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -236,20 +231,12 @@ public class PhotoGalleryFragment extends Fragment {
         mThumbnailDownloaderThread.clearQueue();
     }
 
-    /**
-     *
-     *
-     */
     @Override
     public void onPause() {
         super.onPause();
         PhotoGalleryPreference.setStoredSearchKey(getActivity(), mSearchKey);
     }
 
-    /**
-     *
-     *
-     */
     @Override
     public void onResume() {
         super.onResume();
@@ -260,14 +247,6 @@ public class PhotoGalleryFragment extends Fragment {
         }
     }
 
-    /**
-     *
-     *
-     * @param inflater
-     * @param container
-     * @param savedInstanceState
-     * @return
-     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -287,39 +266,49 @@ public class PhotoGalleryFragment extends Fragment {
         return v;
     }
 
-    /**
-     *
-     *
-     */
-    class PhotoHolder extends RecyclerView.ViewHolder {
+    class PhotoHolder extends RecyclerView.ViewHolder implements
+            View.OnClickListener,
+            View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
 
         ImageView mPhoto;
+        String mBigUrl;
 
         public PhotoHolder(View itemView) {
             super(itemView);
 
-//            mText = (TextView) itemView;
             mPhoto = (ImageView) itemView.findViewById(R.id.image_photo);
+            mPhoto.setOnClickListener(this);
+
+            itemView.setOnCreateContextMenuListener(this);
         }
 
-//        public void bindGalleryItem(GalleryItem galleryItem) {
-//            mText.setText(galleryItem.getTitle());
-//        }
-
-        /**
-         *
-         *
-         * @param drawable
-         */
         public void bindDrawable(@NonNull Drawable drawable) {
             mPhoto.setImageDrawable(drawable);
         }
+
+        public void setBigUrl(String bigUrl){
+            mBigUrl = bigUrl;
+        }
+
+        @Override
+        public void onClick(View v) {
+
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            MenuItem menuItem = menu.add(R.string.open_by_url);
+            menu.setHeaderTitle(mBigUrl);
+            menuItem.setOnMenuItemClickListener(this);
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Toast.makeText(getActivity(), mBigUrl, Toast.LENGTH_LONG).show();
+            return false;
+        }
     }
 
-    /**
-     *
-     *
-     */
     class PhotoGalleryAdapter extends RecyclerView.Adapter<PhotoHolder> {
 
         List<GalleryItem> mGalleryItemList;
@@ -328,13 +317,6 @@ public class PhotoGalleryFragment extends Fragment {
             mGalleryItemList = galleryItems;
         }
 
-        /**
-         *
-         *
-         * @param parent
-         * @param viewType
-         * @return
-         */
         @Override
         public PhotoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(getActivity()).inflate(
@@ -343,12 +325,6 @@ public class PhotoGalleryFragment extends Fragment {
             return new PhotoHolder(v);
         }
 
-        /**
-         *
-         *
-         * @param holder
-         * @param position
-         */
         @Override
         public void onBindViewHolder(PhotoHolder holder, int position) {
 //            holder.bindGalleryItem(mGalleryItemList.get(position));
@@ -358,6 +334,7 @@ public class PhotoGalleryFragment extends Fragment {
             GalleryItem galleryItem = mGalleryItemList.get(position);
             Log.d(TAG, "bind position #" + position + ", url: " + galleryItem.getUrl());
 
+            holder.setBigUrl(galleryItem.getUrl());
             holder.bindDrawable(smileyDrawable);
 
             if(mMemoryCache.get(galleryItem.getUrl()) != null) {
@@ -368,31 +345,16 @@ public class PhotoGalleryFragment extends Fragment {
             }
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public int getItemCount() {
             return mGalleryItemList.size();
         }
     }
 
-    /**
-     *
-     *
-     */
     class FetcherTask extends AsyncTask<String, Void, List<GalleryItem>> {
 
         boolean running = false;
 
-        /**
-         *
-         *
-         * @param params
-         * @return
-         */
         @Override
         protected List<GalleryItem> doInBackground(String... params) {
 
@@ -423,16 +385,6 @@ public class PhotoGalleryFragment extends Fragment {
             return running;
         }
 
-//        @Override
-//        protected void onProgressUpdate(Void... values) {
-//            super.onProgressUpdate(values);
-//        }
-
-        /**
-         *
-         *
-         * @param galleryItems
-         */
         @Override
         protected void onPostExecute(List<GalleryItem> galleryItems) {
             mAdapter = new PhotoGalleryAdapter(galleryItems);

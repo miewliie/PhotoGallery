@@ -1,5 +1,6 @@
 package com.augmentis.ayp.photogallery;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -13,8 +14,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
+
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -30,6 +32,13 @@ public class PollService extends IntentService {
     private static final String TAG = "PollService";
 
     private static final int POLL_INTERVAL = 1000 * 60; //60 sec
+    public static final String ACTION_SHOW_NOTIFICATION = "ayp.aug.photogallery.ACTION_SHOW_NOTIFICATION";
+
+    //permission
+    public static final String PERMISSION_SHOW_NOTIF = "ayp.aug.photogallery.RECEIVE_SHOW_NOTIFICATION";
+    public static final String REQUESTCODE = "REQUES_CODE_INTENT";
+    public static final String NOTIFICATION = "NOTIF";
+
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PollService.class);
@@ -42,24 +51,27 @@ public class PollService extends IntentService {
         AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
 
         if (isOn) {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+//            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 //AlarmManager.RTC -> System.currentTimeMillis();
                 am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,   //param1: Mode
                         SystemClock.elapsedRealtime(),                  //param2: Start
                         POLL_INTERVAL,                                  //param3: Interval
                         pi);                                            //param4: Pending action(intent)
-            }else {
-                PollJobService.start(c);
-                Log.d(TAG, "Run by Scheduler");
-            }
+//            }else {
+//                PollJobService.start(c);
+//                Log.d(TAG, "Run by Scheduler");
+//            }
         } else {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+//            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 am.cancel(pi); //cancel interval call
                 pi.cancel(); // cancel pending intent call
-            }else {
-                PollJobService.stop(c);
-            }
+//            }else {
+//                PollJobService.stop(c);
+//            }
+//
         }
+
+        PhotoGalleryPreference.setStoredIsAlarmOn(c, isOn);
     }
 
     public static boolean isServiceAlarmOn(Context ctx){
@@ -78,7 +90,7 @@ public class PollService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.i(TAG, "Recieve a call from intent: " + intent);
+        Log.i(TAG, "Receive a call from intent: " + intent);
         if (!isNetworkAvailableAndConnected()) {
             return;
         }
@@ -111,6 +123,7 @@ public class PollService extends IntentService {
             Log.i(TAG, "New item found");
 
             Resources res = getResources();
+
             Intent i = PhotoGalleryActivity.newIntent(this);
             PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
 
@@ -125,15 +138,22 @@ public class PollService extends IntentService {
 
             Notification notification = notiBuilder.build(); // << Build notification from builder
 
-            //Get notification manager from contect
-            NotificationManagerCompat nm = NotificationManagerCompat.from(this);
-            nm.notify(Long.valueOf(newestId).intValue(), notification);
-
-            new Screen().on(this);
-
-//            nm.notify(0, notification);
+            sendBackgroundNotification(0, notification);
         }
         PhotoGalleryPreference.setStoredLastId(this, newestId);
+    }
+
+    private void sendBackgroundNotification(int requestCode, Notification notification){
+
+        Intent intent = new Intent(ACTION_SHOW_NOTIFICATION);
+        intent.putExtra(REQUESTCODE, requestCode);
+        intent.putExtra(NOTIFICATION, notification);
+
+        sendOrderedBroadcast(intent, PERMISSION_SHOW_NOTIF,
+                null, null,
+                Activity.RESULT_OK,
+                null, null);
+
     }
 
     private boolean isNetworkAvailableAndConnected() {

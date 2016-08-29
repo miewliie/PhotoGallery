@@ -1,6 +1,7 @@
 package com.augmentis.ayp.photogallery;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.job.JobInfo;
@@ -27,6 +28,8 @@ import java.util.List;
 public class PollJobService extends JobService {
     
     private static final String TAG = "PollJobService";
+    public static final String REQUESTCODE = "REQUES_CODE_INTENT";
+    public static final String NOTIFICATION = "NOTIF";
     
     private PollTask mPollTask;
     
@@ -134,14 +137,8 @@ public class PollJobService extends JobService {
                     notiBuilder.setAutoCancel(true); //if it already have it not appear
 
                     Notification notification = notiBuilder.build(); // << Build notification from builder
-
-                    //Get notification manager from contect
-                    NotificationManagerCompat nm = NotificationManagerCompat.from(PollJobService.this);
-                    nm.notify(Long.valueOf(newestId).intValue(), notification);
-
-                    new Screen().on(PollJobService.this);
-
-//            nm.notify(0, notification);
+                    sendBackgroundNotification(0, notification);
+//
                 }
                 PhotoGalleryPreference.setStoredLastId(PollJobService.this, newestId);
             }
@@ -149,6 +146,20 @@ public class PollJobService extends JobService {
             /////
 
             return null;
+        }
+
+
+        private void sendBackgroundNotification(int requestCode, Notification notification){
+
+            Intent intent = new Intent(PollService.ACTION_SHOW_NOTIFICATION);
+            intent.putExtra(REQUESTCODE, requestCode);
+            intent.putExtra(NOTIFICATION, notification);
+
+            sendOrderedBroadcast(intent, PollService.PERMISSION_SHOW_NOTIF,
+                    null, null,
+                    Activity.RESULT_OK,
+                    null, null);
+
         }
     }
 }
