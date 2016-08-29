@@ -36,11 +36,6 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
     private static final String TAG = "PhotoGalleryFragment";
 
-    /**
-     * Method for make sure isPhotoGalleryFragment.
-     *
-     * @return
-     */
     public static PhotoGalleryFragment newInstance() {
         Bundle args = new Bundle();
         PhotoGalleryFragment fragment = new PhotoGalleryFragment();
@@ -63,11 +58,6 @@ public class PhotoGalleryFragment extends VisibleFragment {
     // Use 1/8th of the available memory for this memory cache.
     final int cacheSize = maxMemory / 8;
 
-    /**
-     *
-     *
-     * @param savedInstanceState
-     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,12 +107,6 @@ public class PhotoGalleryFragment extends VisibleFragment {
         Log.i(TAG, "Start background thread");
     }
 
-    /**
-     *
-     *
-     * @param menu
-     * @param inflater
-     */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -166,12 +150,6 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
     }
 
-    /**
-     *
-     *
-     * @param item
-     * @return
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -271,7 +249,8 @@ public class PhotoGalleryFragment extends VisibleFragment {
             View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
 
         ImageView mPhoto;
-        String mBigUrl;
+//        String mBigUrl;
+        GalleryItem mGalleryItem;
 
         public PhotoHolder(View itemView) {
             super(itemView);
@@ -279,15 +258,15 @@ public class PhotoGalleryFragment extends VisibleFragment {
             mPhoto = (ImageView) itemView.findViewById(R.id.image_photo);
             mPhoto.setOnClickListener(this);
 
-            itemView.setOnCreateContextMenuListener(this);
+            itemView.setOnCreateContextMenuListener(this); // itemView is which holder are holding
         }
 
         public void bindDrawable(@NonNull Drawable drawable) {
             mPhoto.setImageDrawable(drawable);
         }
 
-        public void setBigUrl(String bigUrl){
-            mBigUrl = bigUrl;
+        public void bindGalleryItem(GalleryItem galleryItem){
+            mGalleryItem = galleryItem;
         }
 
         @Override
@@ -297,14 +276,32 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-            MenuItem menuItem = menu.add(R.string.open_by_url);
-            menu.setHeaderTitle(mBigUrl);
+            menu.setHeaderTitle(mGalleryItem.getPhotoUri().toString());
+
+            MenuItem menuItem = menu.add(0, 1, 0, R.string.open_with_external_browser);
             menuItem.setOnMenuItemClickListener(this);
+            //
+            MenuItem menuItem2 = menu.add(0, 2, 0, R.string.open_in_app_browser);
+            menuItem2.setOnMenuItemClickListener(this);
         }
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            Toast.makeText(getActivity(), mBigUrl, Toast.LENGTH_LONG).show();
+
+            switch (item.getItemId()) {
+                case 1:
+                Intent intent = new Intent(Intent.ACTION_VIEW, mGalleryItem.getPhotoUri());
+                startActivity(intent); // call external browser by implicit intent
+//            Toast.makeText(getActivity(), mGalleryItem.getUrl(), Toast.LENGTH_LONG).show();
+                return true;
+
+                case 2:
+                    Intent i = PhotoPageActivity.newIntent(getActivity(), mGalleryItem.getPhotoUri());
+                    startActivity(i); // call internal activity by explicit intent
+                    return true;
+
+                default:
+            }
             return false;
         }
     }
@@ -334,7 +331,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
             GalleryItem galleryItem = mGalleryItemList.get(position);
             Log.d(TAG, "bind position #" + position + ", url: " + galleryItem.getUrl());
 
-            holder.setBigUrl(galleryItem.getUrl());
+            holder.bindGalleryItem(galleryItem);
             holder.bindDrawable(smileyDrawable);
 
             if(mMemoryCache.get(galleryItem.getUrl()) != null) {

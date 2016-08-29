@@ -41,16 +41,19 @@ public class FlickrFetcherAndroidTest {
 
     @Test
     public void testFetch() throws Exception{
-        String json = mFlickrFetcher.fetchItem();
+        List<GalleryItem> galleryItemList = new ArrayList<>();
+        mFlickrFetcher.searchPhotos(galleryItemList, "flower");
 
-        assertThat(json, containsString("perpage"));
+        assertThat(galleryItemList.size(), not(0));
     }
 
     @Test
-    public void testFetchList() throws Exception{
+    public void testGetRecent() throws Exception{
         List<GalleryItem> galleryItemList = new ArrayList<>();
-       mFlickrFetcher.fetchItem(galleryItemList);
+       mFlickrFetcher.getRecentPhotos(galleryItemList);
 
-        assertThat(galleryItemList.size(), is(100));
+        assertThat(galleryItemList.size(), not(0));
+        assertThat(galleryItemList.get(0).getmOwner(), notNullValue());
     }
+
 }
