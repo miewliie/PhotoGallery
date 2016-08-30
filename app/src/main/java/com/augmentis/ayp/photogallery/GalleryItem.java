@@ -2,9 +2,6 @@ package com.augmentis.ayp.photogallery;
 
 import android.net.Uri;
 
-import java.sql.SQLOutput;
-import java.util.Objects;
-
 /**
  * Created by Apinya on 8/16/2016.
  */
@@ -14,6 +11,7 @@ public class GalleryItem {
     private String mTitle;
     private String mUrl;
     private String mOwner;
+    private String mBigSizeUrl;
 
     public void setId(String id) {
         mId = id;
@@ -67,6 +65,15 @@ public class GalleryItem {
         return mOwner;
     }
 
+    public void setmBigSizeUrl(String mBigSizeUrl) {
+        this.mBigSizeUrl = mBigSizeUrl;
+    }
+
+    public String getmBigSizeUrl() {
+        return mBigSizeUrl;
+    }
+
+
     private static final String PHOTO_URL_PREFIX = "https://www.flickr.com/photos/";
 
     public Uri getPhotoUri(){
@@ -75,4 +82,5 @@ public class GalleryItem {
                 .appendPath(mId)
                 .build(); // Return Uri
     }
+
 }
