@@ -27,4 +27,9 @@
     <item android:id="@+id/menu_alarm_clock"
         android:title="@string/alarm_clock"
         app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_setting"
+        android:title="@string/photo_setting"
+        app:showAsAction="never"/>
+
 </menu>

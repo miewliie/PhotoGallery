@@ -27,6 +27,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +56,9 @@ public class PhotoGalleryFragment extends VisibleFragment {
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloaderThread;
     private FetcherTask mFetcherTask;
     private String mSearchKey;
+    private Boolean mUseGps;
+    private GoogleApiClient mGoogleApiClient;
+
 
     // Cache
     private LruCache<String, Bitmap> mMemoryCache;
@@ -60,6 +66,21 @@ public class PhotoGalleryFragment extends VisibleFragment {
     final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
     // Use 1/8th of the available memory for this memory cache.
     final int cacheSize = maxMemory / 8;
+
+    private GoogleApiClient.ConnectionCallbacks mCCallbacks = new GoogleApiClient.ConnectionCallbacks() {
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+
+            Log.i(TAG, "Google API connected");
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+
+            Log.i(TAG, "Google API suspended");
+        }
+    };
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -106,6 +127,11 @@ public class PhotoGalleryFragment extends VisibleFragment {
         mThumbnailDownloaderThread.setmThumbnailDownloaderListener(listener);
         mThumbnailDownloaderThread.start();
         mThumbnailDownloaderThread.getLooper();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(mCCallbacks)
+                .build();
 
         Log.i(TAG, "Start background thread");
     }
@@ -181,6 +207,13 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
             case R.id.menu_alarm_clock:
                 return true;
+
+            case R.id.menu_setting:
+
+                Intent intent = SettingActivity.newIntent(getActivity());
+                startActivity(intent);
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -195,6 +228,18 @@ public class PhotoGalleryFragment extends VisibleFragment {
                 mFetcherTask.execute();
             }
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -226,6 +271,11 @@ public class PhotoGalleryFragment extends VisibleFragment {
         if (searchKey != null) {
             mSearchKey = searchKey;
         }
+
+        mUseGps = PhotoGalleryPreference.getUseGPS(getActivity());
+
+        Log.d(TAG, "on resume completed, mSearchKey = " + mSearchKey
+         + ", mUseGPS = " + mUseGps);
     }
 
     @Nullable
