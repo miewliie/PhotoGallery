@@ -117,6 +117,9 @@ public class PhotoGalleryFragment extends VisibleFragment {
         setHasOptionsMenu(true);
         setRetainInstance(true);
 
+        mUseGps = PhotoGalleryPreference.getUseGPS(getActivity());
+        mSearchKey = PhotoGalleryPreference.getStoredSearchKey(getActivity() );
+
         Intent i = PollService.newIntent(getActivity());
         getActivity().startService(i);
 //
@@ -503,7 +506,16 @@ public class PhotoGalleryFragment extends VisibleFragment {
                 List<GalleryItem> itemList = new ArrayList<>();
 
                 if (params.length > 0) {
-                    mFlickrFetcher.searchPhotos(itemList, params[0]);
+
+                    if(mUseGps && mLocation != null){
+                        mFlickrFetcher.searchPhotos(itemList, params[0],
+                                String.valueOf(mLocation.getLatitude() ),
+                                String.valueOf(mLocation.getLongitude() )
+                        );
+                    }else {
+                        mFlickrFetcher.searchPhotos(itemList, params[0]);
+                    }
+
                 } else {
                     mFlickrFetcher.getRecentPhotos(itemList);
                 }
