@@ -33,6 +33,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -80,8 +82,11 @@ public class PhotoGalleryFragment extends VisibleFragment {
     private GoogleApiClient.ConnectionCallbacks mCCallbacks = new GoogleApiClient.ConnectionCallbacks() {
         @Override
         public void onConnected(@Nullable Bundle bundle) {
-
             Log.i(TAG, "Google API connected");
+
+            if(mUseGps){
+                findLocation();
+            }
         }
 
         @Override
@@ -94,7 +99,8 @@ public class PhotoGalleryFragment extends VisibleFragment {
     private LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(TAG, "Got");
+            Log.d(TAG, "Got Location: " + location.getLatitude()
+            + ", " + location.getLongitude());
 
             mLocation = location;
 
@@ -283,6 +289,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
     public void onPause() {
         super.onPause();
         PhotoGalleryPreference.setStoredSearchKey(getActivity(), mSearchKey);
+        unFindLocation();
     }
 
     @Override
@@ -293,7 +300,6 @@ public class PhotoGalleryFragment extends VisibleFragment {
         if (searchKey != null) {
             mSearchKey = searchKey;
         }
-
         mUseGps = PhotoGalleryPreference.getUseGPS(getActivity());
 
         Log.d(TAG, "on resume completed, mSearchKey = " + mSearchKey
@@ -335,21 +341,29 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
     @SuppressWarnings("all")
     private void requestLocation() {
-        LocationRequest request = LocationRequest.create();
+        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity())
+                == ConnectionResult.SUCCESS) {
 
-        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        request.setNumUpdates(50);
-        request.setInterval(1000);
+            LocationRequest request = LocationRequest.create();
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                request, mLocationListener);
+            request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            request.setNumUpdates(50);
+            request.setInterval(1000);
 
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                    request, mLocationListener);
+
+        }
     }
-        private void unRequestLocation(){
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,
-                mLocationListener);
-    }
 
+    private void unFindLocation() {
+        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity())
+                == ConnectionResult.SUCCESS) {
+
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,
+                    mLocationListener);
+        }
+    }
 
     @Nullable
     @Override
@@ -359,10 +373,6 @@ public class PhotoGalleryFragment extends VisibleFragment {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.photo_gallery_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
-//        if (!mFetcherTask.isRunning()) {
-//            mFetcherTask = new FetcherTask();
-//            mFetcherTask.execute();
-//        }
         mSearchKey = PhotoGalleryPreference.getStoredSearchKey(getActivity());
         loadPhoto();
         Log.d(TAG, "On create complete : ----- Loaded key -----" + mSearchKey);
