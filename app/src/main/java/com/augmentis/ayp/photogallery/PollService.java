@@ -58,7 +58,7 @@ public class PollService extends IntentService {
                         POLL_INTERVAL,                                  //param3: Interval
                         pi);                                            //param4: Pending action(intent)
 //            }else {
-//                PollJobService.start(c);
+                PollJobService.start(c);
 //                Log.d(TAG, "Run by Scheduler");
 //            }
         } else {
@@ -66,7 +66,7 @@ public class PollService extends IntentService {
                 am.cancel(pi); //cancel interval call
                 pi.cancel(); // cancel pending intent call
 //            }else {
-//                PollJobService.stop(c);
+                PollJobService.stop(c);
 //            }
 //
         }
@@ -91,6 +91,7 @@ public class PollService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.i(TAG, "Receive a call from intent: " + intent);
+
         if (!isNetworkAvailableAndConnected()) {
             return;
         }

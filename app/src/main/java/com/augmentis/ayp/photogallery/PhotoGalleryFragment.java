@@ -218,7 +218,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
                 boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
 
-                Log.d(TAG, ((shouldStartAlarm) ? "Start" : "Stop") + "Intent service" );
+                Log.d(TAG, ((shouldStartAlarm) ? "Start" : "Stop") + " Intent service" );
 
                 PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
                 getActivity().invalidateOptionsMenu(); //refresh menu

@@ -35,7 +35,10 @@ public class PhotoGalleryPreference {
     }
 
     public static void setStoredIsAlarmOn (Context context, Boolean isAlarmOn){
-       mySharedPref(context).edit().putBoolean(PREF_IS_ALARM_ON, isAlarmOn).apply();
+       mySharedPref(context)
+               .edit()
+               .putBoolean(PREF_IS_ALARM_ON, isAlarmOn)
+               .apply();
     }
 
 
