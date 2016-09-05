@@ -278,6 +278,21 @@ public class PhotoGalleryFragment extends VisibleFragment {
          + ", mUseGPS = " + mUseGps);
     }
 
+    private void findLocation(){
+        if(hasPermission()){
+            requestLocation();
+        }
+    }
+
+    private boolean hasPermission(){
+        int
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
