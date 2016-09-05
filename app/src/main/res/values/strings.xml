@@ -20,4 +20,6 @@
     <string name="photo_setting">Setting !</string>
 
     <string name="use_gps_setting">Use GPS Setting when searching for photos</string>
+    <string name="photo_map">Photo Map</string>
+    <string name="open_in_map">Open In Map</string>
 </resources>
