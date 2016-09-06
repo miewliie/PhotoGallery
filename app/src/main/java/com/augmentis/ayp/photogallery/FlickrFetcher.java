@@ -131,7 +131,7 @@ public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
         builder.appendQueryParameter("api_key", API_KEY)
                 .appendQueryParameter("format", "json")
                 .appendQueryParameter("nojsoncallback", "1")
-                .appendQueryParameter("extras", "url_s , url_o");
+                .appendQueryParameter("extras", "url_s , url_o, geo");
 
         if (METHOD_SERACH.equalsIgnoreCase(method)) {
             builder.appendQueryParameter("text", param[0]);
@@ -239,7 +239,10 @@ public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
                 continue;
             }
 
-            item.setmBigSizeUrl(jsonPhotoItem.getString("url_o"));
+
+            item.setmBigSizeUrl(jsonPhotoItem.getString("url_o") );
+            item.setmLat(jsonPhotoItem.getString("latitude") );
+            item.setmLon(jsonPhotoItem.getString("longitude") );
 
             newGalleryItemList.add(item);
         }

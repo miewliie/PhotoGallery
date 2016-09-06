@@ -79,19 +79,25 @@ public class PhotoGalleryFragment extends VisibleFragment {
     // Use 1/8th of the available memory for this memory cache.
     final int cacheSize = maxMemory / 8;
 
-    private GoogleApiClient.ConnectionCallbacks mCCallbacks = new GoogleApiClient.ConnectionCallbacks() {
+    @SuppressWarnings("all")
+    private GoogleApiClient.ConnectionCallbacks mCCallbacks =
+            new GoogleApiClient.ConnectionCallbacks() {
+
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             Log.i(TAG, "Google API connected");
 
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Log.i(TAG, "Last location : " + mLocation);
+
             if(mUseGps){
                 findLocation();
+                loadPhoto();
             }
         }
 
         @Override
         public void onConnectionSuspended(int i) {
-
             Log.i(TAG, "Google API suspended");
         }
     };
@@ -103,6 +109,10 @@ public class PhotoGalleryFragment extends VisibleFragment {
             + ", " + location.getLongitude());
 
             mLocation = location;
+
+            if(mUseGps){
+                loadPhoto();
+            }
 
             Toast.makeText(getActivity(), location.getLatitude() + ", "
                     + location.getLongitude(), Toast.LENGTH_LONG).show();
@@ -135,10 +145,10 @@ public class PhotoGalleryFragment extends VisibleFragment {
             }
         };
 
-        // Move from onCreateView
-        mFlickrFetcher = new FlickrFetcher();
-        mFetcherTask = new FetcherTask();
-        new FetcherTask().execute(); //run another thread.
+//        // Move from onCreateView
+//        mFlickrFetcher = new FlickrFetcher();
+//        mFetcherTask = new FetcherTask();
+//        new FetcherTask().execute(); //run another thread.
 
         Handler responseUIHandler = new Handler();
         ThumbnailDownloader.ThumbnailDownloaderListener<PhotoHolder> listener =
@@ -250,7 +260,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
     }
 
     private void loadPhoto() {
-        if (mFetcherTask == null || !mFetcherTask.isRunning()) {
+        if (mFetcherTask == null) {
             mFetcherTask = new FetcherTask();
 
             if (mSearchKey != null) {
@@ -258,6 +268,8 @@ public class PhotoGalleryFragment extends VisibleFragment {
             } else {
                 mFetcherTask.execute();
             }
+        }else {
+            Log.d(TAG, "Fetch task is running now" );
         }
     }
 
@@ -303,7 +315,12 @@ public class PhotoGalleryFragment extends VisibleFragment {
         if (searchKey != null) {
             mSearchKey = searchKey;
         }
+
         mUseGps = PhotoGalleryPreference.getUseGPS(getActivity());
+
+        if(!mUseGps){
+            loadPhoto();
+        }
 
         Log.d(TAG, "on resume completed, mSearchKey = " + mSearchKey
          + ", mUseGPS = " + mUseGps);
@@ -368,6 +385,8 @@ public class PhotoGalleryFragment extends VisibleFragment {
         }
     }
 
+    private List<GalleryItem> mItems;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -376,8 +395,11 @@ public class PhotoGalleryFragment extends VisibleFragment {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.photo_gallery_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
+        mItems = new ArrayList<>();
+        mRecyclerView.setAdapter(new PhotoGalleryAdapter(mItems));
+
         mSearchKey = PhotoGalleryPreference.getStoredSearchKey(getActivity());
-        loadPhoto();
+//        loadPhoto();
         Log.d(TAG, "On create complete : ----- Loaded key -----" + mSearchKey);
 //        mRecyclerView.setAdapter(new PhotoGalleryAdapter(itemList));
         return v;
@@ -445,12 +467,14 @@ public class PhotoGalleryFragment extends VisibleFragment {
                     startActivity(i2); // call internal activity by explicit intent
                     return true;
                 case 3:
-                    Location itemLoc = new Location("");
-                    itemLoc.setLatitude(Double.valueOf(mGalleryItem.getmLat() ) );
-                    itemLoc.setLatitude(Double.valueOf(mGalleryItem.getmLon() ) );
+                    Location itemLoc = null;
+                    if(mGalleryItem.isGeoCorrect() ) {
+                            itemLoc = new Location("");
+                            itemLoc.setLatitude(Double.valueOf(mGalleryItem.getmLat()));
+                            itemLoc.setLongitude(Double.valueOf(mGalleryItem.getmLon()));
+                        }
 
-
-                    Intent i3 = PhotoMapActivity.newIntent(getActivity(), mLocation, null, null);
+                    Intent i3 = PhotoMapActivity.newIntent(getActivity(), mLocation, itemLoc, mGalleryItem.getUrl());
                     startActivity(i3);
 
                 default:
@@ -503,54 +527,48 @@ public class PhotoGalleryFragment extends VisibleFragment {
 
     class FetcherTask extends AsyncTask<String, Void, List<GalleryItem>> {
 
-        boolean running = false;
-
         @Override
         protected List<GalleryItem> doInBackground(String... params) {
 
-            synchronized (this) {
-                running = true;
-            }
-
-            try {
                 Log.d(TAG, "Fetcher task finish");
                 List<GalleryItem> itemList = new ArrayList<>();
+                FlickrFetcher flickrFetcher = new FlickrFetcher();
 
                 if (params.length > 0) {
 
-                    if(mUseGps && mLocation != null){
-                        mFlickrFetcher.searchPhotos(itemList, params[0],
-                                String.valueOf(mLocation.getLatitude() ),
-                                String.valueOf(mLocation.getLongitude() )
-                        );
-                    }else {
-                        mFlickrFetcher.searchPhotos(itemList, params[0]);
-                    }
+                            if(mUseGps && mLocation != null){
+                                flickrFetcher.searchPhotos(itemList, params[0],
+                                        String.valueOf(mLocation.getLatitude() ),
+                                        String.valueOf(mLocation.getLongitude() )
+                                );
+                            }else {
+                                flickrFetcher.searchPhotos(itemList, params[0]);
+                            }
 
-                } else {
-                    mFlickrFetcher.getRecentPhotos(itemList);
-                }
+                } else
+                        {
+                            flickrFetcher.getRecentPhotos(itemList);
+                        }
 
                 Log.d(TAG, "Fetcher task finish");
                 return itemList;
-            } finally {
-                synchronized (this) {
-                    running = false;
-                }
             }
-        }
 
-        boolean isRunning() {
-            return running;
-        }
+    private List<GalleryItem> mItems;
 
         @Override
         protected void onPostExecute(List<GalleryItem> galleryItems) {
-            mAdapter = new PhotoGalleryAdapter(galleryItems);
+            mItems = galleryItems;
+
+//            mAdapter = new PhotoGalleryAdapter(galleryItems);
+
             mRecyclerView.setAdapter(mAdapter);
-//                mRecyclerView.setAdapter(new PhotoGalleryAdapter(mItems));
+            mRecyclerView.setAdapter(new PhotoGalleryAdapter(mItems));
+
             String formatString = getResources().getString(R.string.photo_progress_loaded);
-//            Snackbar.make(mRecyclerView, formatString, Snackbar.LENGTH_SHORT).show();
+
+            mFetcherTask = null;
+
         }
     }
 }
