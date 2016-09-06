@@ -54,11 +54,11 @@ public class PhotoDialog extends DialogFragment implements DialogInterface.OnCli
 
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_photo, null);
         imageView = (ImageView) v.findViewById(R.id.photo_view);
-        imageView.setImageBitmap(loadBitmap);
+//        imageView.setImageBitmap(loadBitmap);
 
-//        if(BigUrl != null){
-//            Glide.with(getActivity() ).load(BigUrl).into(imageView);
-//        }
+        if(loadBitmap != null){
+            Glide.with(getActivity() ).load(loadBitmap).into(imageView);
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(v);

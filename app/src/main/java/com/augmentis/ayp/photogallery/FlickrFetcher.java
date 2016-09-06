@@ -239,8 +239,8 @@ public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
                 continue;
             }
 
-
             item.setmBigSizeUrl(jsonPhotoItem.getString("url_o") );
+
             item.setmLat(jsonPhotoItem.getString("latitude") );
             item.setmLon(jsonPhotoItem.getString("longitude") );
 
