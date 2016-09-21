@@ -26,7 +26,9 @@ public class PhotoGalleryPreference {
     }
 
     public static void setUseGPS(Context context, boolean use_gps){
-        mySharedPref(context).edit().putBoolean(PREF_USE_GPS, use_gps)
+        mySharedPref(context)
+                .edit()
+                .putBoolean(PREF_USE_GPS, use_gps)
                 .apply();
     }
 

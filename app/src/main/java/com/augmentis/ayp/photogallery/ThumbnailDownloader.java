@@ -90,6 +90,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             Log.e(TAG, "Error downloading...");
         }
     }
+
     public void queueThumbnailDownload(T target, String url) {
         Log.i(TAG, "Got url: " + url);
 

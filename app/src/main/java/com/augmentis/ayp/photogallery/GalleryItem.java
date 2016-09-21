@@ -15,13 +15,6 @@ public class GalleryItem {
     private String mLat;
     private String mLon;
 
-    public String getmId() {
-        return mId;
-    }
-
-    public void setmId(String mId) {
-        this.mId = mId;
-    }
 
     public String getmLat() {
         return mLat;

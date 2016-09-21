@@ -7,11 +7,14 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="ayp.aug.photogallery.RECEIVE_SHOW_NOTIFICATION" />
 
+    //
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
@@ -42,6 +45,7 @@
             android:name=".PollJobService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
         <service android:name=".PollService" />
 
         <receiver

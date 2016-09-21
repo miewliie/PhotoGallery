@@ -18,16 +18,10 @@ import java.util.List;
 /**
  * Created by Apinya on 8/16/2016.
  */
-public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
+public class FlickrFetcher {
 
-    /**
-     *  Open connection.
-     *  Read and write data from stream.
-     *
-     * @param urlSpec
-     * @return
-     * @throws IOException
-     */
+    private static final String TAG = "FlickrFetcher";
+
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
 
@@ -60,13 +54,6 @@ public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
         }
     }
 
-    /**
-     * Convert urlByte to string.
-     *
-     * @param urlSpec
-     * @return
-     * @throws IOException
-     */
     public String getUrlString(String urlSpec) throws IOException {
         return new String(getUrlBytes(urlSpec));
     }
@@ -123,6 +110,7 @@ public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
     private String buildUrl(String method, String... param) throws IOException {
 
         String jsonString = null;
+
         Uri baseUrl = Uri.parse(FLICKR_URL);
         Uri.Builder builder = baseUrl.buildUpon();
 
@@ -206,14 +194,6 @@ public class FlickrFetcher { private static final String TAG = "FlickrFetcher";
             }
     }
 
-    /**
-     * Convert JSON object detail to data for add in each item of GalleryItem.
-     *
-     * @param newGalleryItemList List of GalleryItem class
-     * @param jsonBodyStr String that data of JSON object
-     * @throws IOException
-     * @throws JSONException
-     */
     private void parseJSON(List<GalleryItem> newGalleryItemList, String jsonBodyStr)
             throws IOException, JSONException {
 
